@@ -15,7 +15,7 @@ import pythoncom
 import pyHook
 
 
-class Interface(Frame, application):
+class Interface(Frame):
 
     """Cette classe gère l'ensemble de l'interface graphique.
 
