@@ -65,7 +65,7 @@ class Interface(Frame):
         self.message["text"] = "Le simulateur de clique molette est démarré."
 
     def arreter(self):
-        """Méthodee appelée lors de l'appui sur le bouton ARRETER"""
+        """Méthoe appelée lors de l'appui sur le bouton ARRETER"""
         self.application.arreter()
         self.message["text"] = "Le simulateur de clique molette est arrêté."
 		
