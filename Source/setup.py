@@ -15,6 +15,14 @@ setup(name="ClickMolette",
       windows = [
         {
             "script": "ClickMolette.py",
-            "icon_resources": [(1, "icone.ico")]
+            "icon_resources": [(0, "icone.ico")]
+        }],
+      options =
+        {
+            "py2exe": 
+                {
+                    "compressed": 2,
+                    "optimize": 1,
+                }
         }
-    ],)
+    )
