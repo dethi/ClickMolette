@@ -1,12 +1,11 @@
-# -*-coding:Utf-8 -*
+﻿# -*-coding:Utf-8 -*
 
 """Simulateur de clique molette,
-Version 0.1.4,
+Version 0.1.5,
 Réalisé par Deutsch Thibault,
 Plus d'info sur http://www.thionnux.fr/
 """
 
-import time
 from Tkinter import *
 
 import win32api
@@ -27,11 +26,13 @@ class Interface(Frame):
 
     +-- Attributs --
     | self.application
-    | self.message
+    | self.img_souris
+    | self.disp_img
     | self.cadre_info
-    | self.message_info
-    | self.bouton_demarrer
-    | self.bouton_arreter
+    | self.phrase
+    | self.etat
+    | self.cadre_bouton
+    | self.onOff
     +-------------- 
     """
 	
@@ -39,35 +40,58 @@ class Interface(Frame):
         """Méthode d'initialisation de l'interface graphique"""
         self.application = application
 
-        Frame.__init__(self, fenetre, width=768, height=576, **kwargs)
-        self.pack(fill=BOTH)
+        Frame.__init__(self, fenetre, width=190, bg="white", **kwargs)
+        self.pack(fill=BOTH, expand=False)
 
-        # en-tête
-        self.message = Label(self, text="Le simulateur de clique molette est démarré.")
-        self.message.pack()
-
-        # information d'utilisation
-        self.cadre_info = Frame(self, width=700, borderwidth=1)
-        self.cadre_info.pack()
-        self.message_info = Label(self.cadre_info, 
-            text="Appuyer sur le bouton 'arrêt défil' pour simuler un clique molette")
-        self.message_info.pack(fill=X)
-
-        # boutons
-        self.bouton_demarrer = Button(self, text="Démarrer", command=self.demarrer)
-        self.bouton_demarrer.pack()
-        self.bouton_arreter = Button(self, text="Arrêter", command=self.arreter)
-        self.bouton_arreter.pack()
+        # image
+        self.img_souris = PhotoImage(file="souris.gif")
+        self.disp_img = Label(self, image=self.img_souris, bg="white")
+        self.disp_img.pack()
+        
+        # manuel
+        self.cadre_help = Frame(self)
+        self.cadre_help.pack(fill=X)
+        
+        self.help = Label(self.cadre_help, bg="#c6dfff",
+            text="Appuyez sur la touche \"Arrêt Défil\" \n" + \
+            "pour simuler un clique de molette.")
+        self.help.pack(ipadx=5)
+        
+        # état du service
+        self.cadre_info = Frame(self, bg="white")
+        self.cadre_info.pack(fill=X, padx=10, ipady=5)
+        
+        self.phrase = Label(self.cadre_info, bg="white", 
+            text="Etat du service :")
+        self.phrase.pack(side="left")
+        self.etat = Label(self.cadre_info, bg="white", fg="#00bf00", 
+            text="DEMARRER")
+        self.etat.pack(side="right")
+        
+        # bouton on/off
+        self.cadre_bouton = Frame(self, width=100, bg="white")
+        self.cadre_bouton.pack(padx=10, ipady=5, fill=X)
+        
+        self.onOff = Button(self.cadre_bouton, text="Arrêter le service", 
+            relief="groove", bg="#dbdbdb", command=self.arreter)
+        self.onOff.pack(fill=X)
 
     def demarrer(self):
         """Méthode appelée lors de l'appui sur le bouton DEMARRER"""
         self.application.demarrer()
-        self.message["text"] = "Le simulateur de clique molette est démarré."
+        self.onOff["text"] = "Arrêter le service"
+        self.onOff["command"] = self.arreter
+        self.etat["text"] = "DEMARRER"
+        self.etat["fg"] = "#00bf00"
 
     def arreter(self):
         """Méthode appelée lors de l'appui sur le bouton ARRETER"""
         self.application.arreter()
-        self.message["text"] = "Le simulateur de clique molette est arrêté."
+        self.onOff["text"] = "Demarrer le service"
+        self.onOff["command"] = self.demarrer
+        self.etat["text"] = "ARRÊTER"
+        self.etat["fg"] = "red"
+
 		
 class Application():
 
@@ -75,7 +99,7 @@ class Application():
 
     +-- Méthodes --
     | __init__(self)
-    | demarre(self)
+    | demarrer(self)
     | arreter(self)
     +--------------
 
@@ -94,6 +118,9 @@ class Application():
 
         # initialise l'interface graphique
         fenetre = Tk()
+        fenetre.title("ClickMolette")
+        fenetre.iconbitmap(default='icone.ico')
+        fenetre.resizable(False, False)
         interface = Interface(fenetre, self)
         interface.mainloop()
 
@@ -118,7 +145,7 @@ class Application():
 
 
 def main():
-    """Function de démarre de l'application"""
+    """Fonction de démarrage de l'application"""
     simulateur = Application()
 
 if __name__ == "__main__":
