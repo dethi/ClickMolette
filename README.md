@@ -1,4 +1,4 @@
-# Simulateur de clique molette
+# ClickMolette
 
 ## Description :
 
