@@ -14,7 +14,7 @@ setup(name="ClickMolette",
       author_email="thibault.deutsch@gmail.com", 
       windows = [
         {
-            "script": "main.py",
+            "script": "ClickMolette.py",
             "icon_resources": [(1, "icone.ico")]
         }
     ],)
