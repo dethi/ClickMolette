@@ -65,7 +65,7 @@ class Interface(Frame):
             text="Etat du service :")
         self.phrase.pack(side="left")
         self.etat = Label(self.cadre_info, bg="white", fg="#00bf00", 
-            text="DEMARRER")
+            text="DÉMARRÉ")
         self.etat.pack(side="right")
         
         # bouton on/off
@@ -81,7 +81,7 @@ class Interface(Frame):
         self.application.demarrer()
         self.onOff["text"] = "Arrêter le service"
         self.onOff["command"] = self.arreter
-        self.etat["text"] = "DEMARRER"
+        self.etat["text"] = "DÉMARRÉ"
         self.etat["fg"] = "#00bf00"
 
     def arreter(self):
@@ -89,7 +89,7 @@ class Interface(Frame):
         self.application.arreter()
         self.onOff["text"] = "Demarrer le service"
         self.onOff["command"] = self.demarrer
-        self.etat["text"] = "ARRÊTER"
+        self.etat["text"] = "ARRÊTÉ"
         self.etat["fg"] = "red"
 
 		
