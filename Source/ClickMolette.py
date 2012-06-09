@@ -38,10 +38,10 @@ class Interface(Frame):
 	
     def __init__(self, fenetre, **kwargs):
         """Méthode d'initialisation de l'interface graphique"""
+        self.app = None
+        
         Frame.__init__(self, fenetre, width=190, bg="white", **kwargs)
         self.pack(fill=BOTH, expand=False)
-        
-        self.application = Application(self)
         
         # image d'en-tête
         self.img_souris = PhotoImage(file="souris.pgm")
@@ -52,15 +52,15 @@ class Interface(Frame):
         self.cadre_help = Frame(self)
         self.cadre_help.pack(fill=X)
         
-        txt_help = "Appuyez sur la touche \"" + self.application.touche + \
-            "\"\npour simuler un clique de molette."
+        txt_help = "Appuyez sur la touche \"Arrêt Défil\"" + \
+            "\npour simuler un clique de molette."
         self.help = Label(self.cadre_help, bg="#c6dfff", width=27, 
             text=txt_help)
         self.help.pack(fill=X)
         
         # état du service
         self.cadre_info = Frame(self, bg="white")
-        self.cadre_info.pack(fill=X, padx=10, ipady=5)
+        self.cadre_info.pack(fill=X, padx=10, pady=5)
         
         self.phrase = Label(self.cadre_info, bg="white", 
             text="Etat du service :")
@@ -71,7 +71,7 @@ class Interface(Frame):
         
         # boutons
         self.cadre_boutons = Frame(self, bg="white")
-        self.cadre_boutons.pack(padx=10, ipady=5, fill=X)
+        self.cadre_boutons.pack(padx=10, pady=5, fill=X)
         
         self.config_img = PhotoImage(file="config.pgm")
         self.config = Button(self.cadre_boutons, image=self.config_img, 
@@ -84,7 +84,7 @@ class Interface(Frame):
 
     def demarrer(self):
         """Méthode appelée lors de l'appui sur le bouton DEMARRER"""
-        self.application.demarrer()
+        self.app.demarrer()
         self.onOff["text"] = "Arrêter le service"
         self.onOff["command"] = self.arreter
         self.etat["text"] = "DEMARRÉ"
@@ -92,7 +92,7 @@ class Interface(Frame):
 
     def arreter(self):
         """Méthode appelée lors de l'appui sur le bouton ARRETER"""
-        self.application.arreter()
+        self.app.arreter()
         self.onOff["text"] = "Démarrer le service"
         self.onOff["command"] = self.demarrer
         self.etat["text"] = "ARRÊTÉ"
@@ -100,16 +100,13 @@ class Interface(Frame):
         
     def config(self, retour=False):
         """Méthode appelée lors de l'appui sur le bouton config"""
-        self.application.hm.KeyDown = self.application.config
+        self.app.hm.KeyDown = self.app.config
             
     def config_retour(self):
         """Méthode appelée une fois la configuration terminée"""
-        print "3.1"
-        txt_help = "Appuyez sur la touche \"" + self.application.touche + \
+        txt_help = "Appuyez sur la touche \"" + self.app.touche + \
             "\"\npour simuler un clique de molette."
-        print txt_help
-        self.help["text"] = txt_help
-        print "3.2"
+        #self.help["text"] = txt_help
 
 class Application():
 
@@ -126,9 +123,9 @@ class Application():
     +--------------
     """
 
-    def __init__(self, interface):
+    def __init__(self):
         """Méthode d'initialisation de l'application"""
-        self.interface = interface
+        self.UI = None
         
         self.hm = pyHook.HookManager()
         self.hm.KeyDown = self.OnKeyboardEvent
@@ -150,13 +147,9 @@ class Application():
     def config(self, event):
         """Récupère la touche choisi par l'utilisateur"""
         self.touche = event.Key
-        print "1"
         self.arreter()
-        print "2"
-        self.interface.config_retour()
-        print "3"
+        self.UI.config_retour()
         self.hm.KeyDown = self.OnKeyboardEvent
-        print "4"
         self.demarrer()
 
     def OnKeyboardEvent(self, event):
@@ -179,7 +172,13 @@ def main():
     fenetre.title("ClickMolette")
     fenetre.iconbitmap(default='icone.ico')
     fenetre.resizable(False, False)
+    
     interface = Interface(fenetre)
+    application = Application()
+    
+    interface.app = application
+    application.UI = interface
+    
     interface.mainloop()
 
     
