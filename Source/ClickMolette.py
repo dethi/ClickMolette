@@ -1,7 +1,7 @@
 ﻿# -*-coding:Utf-8 -*
 
 """Simulateur de clique molette,
-Version 0.2.0,
+Version 0.1.5,
 Réalisé par Deutsch Thibault,
 Plus d'info sur http://www.thionnux.fr/
 """
@@ -36,27 +36,26 @@ class Interface(Frame):
     +-------------- 
     """
 	
-    def __init__(self, fenetre, **kwargs):
+    def __init__(self, fenetre, application, **kwargs):
         """Méthode d'initialisation de l'interface graphique"""
+        self.application = application
+
         Frame.__init__(self, fenetre, width=190, bg="white", **kwargs)
         self.pack(fill=BOTH, expand=False)
-        
-        self.application = Application(self)
-        
-        # image d'en-tête
-        self.img_souris = PhotoImage(file="souris.pgm")
+
+        # image
+        self.img_souris = PhotoImage(file="souris.gif")
         self.disp_img = Label(self, image=self.img_souris, bg="white")
-        self.disp_img.pack(pady=5)
+        self.disp_img.pack()
         
         # manuel
         self.cadre_help = Frame(self)
         self.cadre_help.pack(fill=X)
         
-        txt_help = "Appuyez sur la touche \"" + self.application.touche + \
-            "\"\npour simuler un clique de molette."
-        self.help = Label(self.cadre_help, bg="#c6dfff", width=27, 
-            text=txt_help)
-        self.help.pack(fill=X)
+        self.help = Label(self.cadre_help, bg="#c6dfff",
+            text="Appuyez sur la touche \"Arrêt Défil\" \n" + \
+            "pour simuler un clique de molette.")
+        self.help.pack(ipadx=5)
         
         # état du service
         self.cadre_info = Frame(self, bg="white")
@@ -66,51 +65,34 @@ class Interface(Frame):
             text="Etat du service :")
         self.phrase.pack(side="left")
         self.etat = Label(self.cadre_info, bg="white", fg="#00bf00", 
-            text="DEMARRÉ")
+            text="DEMARRER")
         self.etat.pack(side="right")
         
-        # boutons
-        self.cadre_boutons = Frame(self, bg="white")
-        self.cadre_boutons.pack(padx=10, ipady=5, fill=X)
+        # bouton on/off
+        self.cadre_bouton = Frame(self, width=100, bg="white")
+        self.cadre_bouton.pack(padx=10, ipady=5, fill=X)
         
-        self.config_img = PhotoImage(file="config.pgm")
-        self.config = Button(self.cadre_boutons, image=self.config_img, 
-            relief="groove", bg="#dbdbdb", command=self.config)
-        self.config.pack(side="right", ipadx=2, ipady=2)        
-        
-        self.onOff = Button(self.cadre_boutons, text="Arrêter le service", 
-            relief="groove", bg="#dbdbdb", width=19, command=self.arreter)
-        self.onOff.pack(side="left")
+        self.onOff = Button(self.cadre_bouton, text="Arrêter le service", 
+            relief="groove", bg="#dbdbdb", command=self.arreter)
+        self.onOff.pack(fill=X)
 
     def demarrer(self):
         """Méthode appelée lors de l'appui sur le bouton DEMARRER"""
         self.application.demarrer()
         self.onOff["text"] = "Arrêter le service"
         self.onOff["command"] = self.arreter
-        self.etat["text"] = "DEMARRÉ"
+        self.etat["text"] = "DEMARRER"
         self.etat["fg"] = "#00bf00"
 
     def arreter(self):
         """Méthode appelée lors de l'appui sur le bouton ARRETER"""
         self.application.arreter()
-        self.onOff["text"] = "Démarrer le service"
+        self.onOff["text"] = "Demarrer le service"
         self.onOff["command"] = self.demarrer
-        self.etat["text"] = "ARRÊTÉ"
+        self.etat["text"] = "ARRÊTER"
         self.etat["fg"] = "red"
-        
-    def config(self, retour=False):
-        """Méthode appelée lors de l'appui sur le bouton config"""
-        self.application.hm.KeyDown = self.application.config
-            
-    def config_retour(self):
-        """Méthode appelée une fois la configuration terminée"""
-        print "3.1"
-        txt_help = "Appuyez sur la touche \"" + self.application.touche + \
-            "\"\npour simuler un clique de molette."
-        print txt_help
-        self.help["text"] = txt_help
-        print "3.2"
 
+		
 class Application():
 
     """Cette classe gère le coeur de l'application
@@ -126,18 +108,21 @@ class Application():
     +--------------
     """
 
-    def __init__(self, interface):
+    def __init__(self):
         """Méthode d'initialisation de l'application"""
-        self.interface = interface
-        
         self.hm = pyHook.HookManager()
         self.hm.KeyDown = self.OnKeyboardEvent
-        
-        # touche raccourci par défault
-        self.touche = "Scroll"
 
         # demarre le hook
         self.demarrer()
+
+        # initialise l'interface graphique
+        fenetre = Tk()
+        fenetre.title("ClickMolette")
+        fenetre.iconbitmap(default='icone.ico')
+        fenetre.resizable(False, False)
+        interface = Interface(fenetre, self)
+        interface.mainloop()
 
     def demarrer(self):
         """Démarre le hook"""
@@ -146,24 +131,13 @@ class Application():
     def arreter(self):
         """Arrête le hook"""
         self.hm.UnhookKeyboard()
-        
-    def config(self, event):
-        """Récupère la touche choisi par l'utilisateur"""
-        self.touche = event.Key
-        print "1"
-        self.arreter()
-        print "2"
-        self.interface.config_retour()
-        print "3"
-        self.hm.KeyDown = self.OnKeyboardEvent
-        print "4"
-        self.demarrer()
 
     def OnKeyboardEvent(self, event):
         """Cette méthode reçoit en entrer l'ensemble des événements clavier.
-        Elle s'occupe de renvoyer l'événement modifié ou non.
+        Elle s'occupe de renvoyer l'événement normal au système ou une touche 
+        modifié si l'on appuie sur 'Arret défil'
         """
-        if event.Key == self.touche:
+        if event.Key == "Scroll":
             win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEDOWN,0,0,0)
             win32api.mouse_event(win32con.MOUSEEVENTF_MIDDLEUP,0,0,0)
             return False
@@ -171,17 +145,8 @@ class Application():
 
 
 def main():
-    """Fonction de démarrage de l'application.
-    Elle s'occupe d'initialiser l'interface graphique et de lancer la
-    bloucle d'exécution.
-    """
-    fenetre = Tk()
-    fenetre.title("ClickMolette")
-    fenetre.iconbitmap(default='icone.ico')
-    fenetre.resizable(False, False)
-    interface = Interface(fenetre)
-    interface.mainloop()
+    """Fonction de démarrage de l'application"""
+    simulateur = Application()
 
-    
 if __name__ == "__main__":
     main()
